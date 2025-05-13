@@ -54,16 +54,17 @@ def login():
     if not user or not user.check_password(data['password']):
         return jsonify({"msg": "Invalid credentials"}), 401
 
-    access_token = create_access_token(identity={"id": user.id})
-    refresh_token = create_refresh_token(identity={"id": user.id})
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
+
     return jsonify(access_token=access_token, refresh_token=refresh_token), 200
 
 # Authenticated profile route
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def profile():
-    identity = get_jwt_identity()
-    user = User.query.get(identity['id'])
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id))
 
     if not user:
         return jsonify({"msg": "User not found"}), 404
